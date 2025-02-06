@@ -21,7 +21,7 @@ int main(void){
 	int* numbers = generate_random_numbers(n);
 	print_numbers(numbers, n);
 
-	selection_sort(numbers, n);
+	shell_sort(numbers, n);
 
 	print_numbers(numbers, n);
 
@@ -101,11 +101,29 @@ void selection_sort(int* numbers, int length){
 				min = j;
 			}
 		}
+
 		tmp = numbers[i];
 		numbers[i] = numbers[min];
 		numbers[min] = tmp;
-
-		print_numbers(numbers, n);
 	}
 }
 
+void shell_sort(int* numbers, int length){
+	int tmp, key, j = 0;
+	
+	for(int gap = length/2; gap > 0; gap /= 2){
+		for(int i = gap; i < length; i++){
+			key = numbers[i];
+
+			j = i;
+
+			while(j >= gap && numbers[j-gap] > key){
+				print_numbers(numbers, n);
+				numbers[j] = numbers[j-gap];
+				j -= gap;
+			}
+
+			numbers[j] = key;
+		}
+	}
+}
