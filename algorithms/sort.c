@@ -21,7 +21,7 @@ int main(void){
 	int* numbers = generate_random_numbers(n);
 	print_numbers(numbers, n);
 
-	bubble_sort(numbers, n);
+	selection_sort(numbers, n);
 
 	print_numbers(numbers, n);
 
@@ -69,6 +69,43 @@ void bubble_sort(int* numbers, int length){
 				numbers[j-1] = tmp;
 			}
 		}
+	}
+}
+
+void insertion_sort(int* numbers, int length){
+	int j, tmp, key = 0;
+
+	for(int i = 1; i<length; i++){
+		key = numbers[i];
+
+		j = i-1;
+
+		while(j >= 0 && numbers[j] > key){
+			print_numbers(numbers, n);
+			numbers[j+1] = numbers[j];
+			j--;
+		}
+
+		numbers[j+1] = key;
+	}
+}
+
+void selection_sort(int* numbers, int length){
+	int min, tmp = 0;
+
+	for(int i = 0; i < length; i++){
+		min = i;
+
+		for(int j = i; j < length; j++){
+			if(numbers[min] > numbers[j]){
+				min = j;
+			}
+		}
+		tmp = numbers[i];
+		numbers[i] = numbers[min];
+		numbers[min] = tmp;
+
+		print_numbers(numbers, n);
 	}
 }
 
