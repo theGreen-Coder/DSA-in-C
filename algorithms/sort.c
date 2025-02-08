@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 int* generate_random_numbers(int length);
@@ -8,7 +9,7 @@ void bubble_sort(int* numbers, int length);
 void insertion_sort(int* numbers, int length);
 void selection_sort(int* numbers, int length);
 void shell_sort(int* numbers, int length);
-void merge_sort(int* numbers, int length);
+int* merge_sort(int* numbers, int length);
 void quick_sort(int* numbers, int length);
 void heap_sort(int* numbers, int length);
 
@@ -33,6 +34,8 @@ int main(void){
 
 int* generate_random_numbers(int length) {
 	int* numbers = malloc(sizeof(int)*length);
+
+	srand ( time(NULL) );
 
 	if(numbers == NULL){
 		return NULL;
@@ -73,7 +76,7 @@ void bubble_sort(int* numbers, int length){
 }
 
 void insertion_sort(int* numbers, int length){
-	int j, tmp, key = 0;
+	int j = 0, tmp = 0, key = 0;
 
 	for(int i = 1; i<length; i++){
 		key = numbers[i];
@@ -81,7 +84,7 @@ void insertion_sort(int* numbers, int length){
 		j = i-1;
 
 		while(j >= 0 && numbers[j] > key){
-			print_numbers(numbers, n);
+			// print_numbers(numbers, n);
 			numbers[j+1] = numbers[j];
 			j--;
 		}
@@ -91,7 +94,7 @@ void insertion_sort(int* numbers, int length){
 }
 
 void selection_sort(int* numbers, int length){
-	int min, tmp = 0;
+	int min = 0, tmp = 0;
 
 	for(int i = 0; i < length; i++){
 		min = i;
@@ -109,7 +112,7 @@ void selection_sort(int* numbers, int length){
 }
 
 void shell_sort(int* numbers, int length){
-	int tmp, key, j = 0;
+	int tmp = 0, key = 0, j = 0;
 	
 	for(int gap = length/2; gap > 0; gap /= 2){
 		for(int i = gap; i < length; i++){
@@ -118,7 +121,7 @@ void shell_sort(int* numbers, int length){
 			j = i;
 
 			while(j >= gap && numbers[j-gap] > key){
-				print_numbers(numbers, n);
+				// print_numbers(numbers, n);
 				numbers[j] = numbers[j-gap];
 				j -= gap;
 			}
@@ -126,4 +129,47 @@ void shell_sort(int* numbers, int length){
 			numbers[j] = key;
 		}
 	}
+}
+
+int* merge_sort(int* numbers, int length){
+	if(length==1){
+		return numbers;
+	}
+
+	int mid = (length)/2;
+
+	int* left = merge_sort(&numbers[0], mid);
+	int* right = merge_sort(&numbers[mid], length-mid);
+
+	int i = 0, j = 0;
+
+	int* tmp = malloc(sizeof(int)*length);
+
+	while(i < mid && j < (length-mid)){
+		if(left[i] < right[j]){
+			tmp[i+j] = left[i];
+			i++;
+		}
+		else{
+			tmp[i+j] = right[j];
+			j++;
+		}
+	}
+
+	while(i < mid){
+		tmp[i+j] = left[i];
+		i++;
+	}
+
+	while(j < (length-mid)){
+		tmp[i+j] = right[j];
+		j++;
+	}
+
+	memcpy(numbers, tmp, length*sizeof(numbers[0]));
+
+	free(tmp);
+	tmp = NULL;
+
+	return numbers;
 }
