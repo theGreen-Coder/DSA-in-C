@@ -4,13 +4,14 @@
 #include <time.h>
 
 int* generate_random_numbers(int length);
+int is_sorted(int* numbers, int length); 
 
 void bubble_sort(int* numbers, int length);
 void insertion_sort(int* numbers, int length);
 void selection_sort(int* numbers, int length);
 void shell_sort(int* numbers, int length);
 int* merge_sort(int* numbers, int length);
-int* quick_sort(int* numbers, int length);
+void quick_sort(int* numbers, int length);
 void heap_sort(int* numbers, int length);
 
 void print_numbers(int* numbers, int length);
@@ -22,9 +23,11 @@ int main(void){
 	int* numbers = generate_random_numbers(n);
 	print_numbers(numbers, n);
 
-	quick_sort(numbers, n);
+	heap_sort(numbers, n);
 
 	print_numbers(numbers, n);
+
+	printf("RESULT (is it sorted?): %d\n", is_sorted(numbers, n));
 
 	free(numbers);
 	numbers = NULL;
@@ -65,6 +68,20 @@ void swap(int* a, int* b){
 	int tmp = *a;
 	*a = *b;
 	*b = tmp;
+}
+
+int is_sorted(int* numbers, int length){
+	int flag = 1;
+	int last = numbers[0];
+
+	for(int i=1; i < length; i++){
+		if(last > numbers[i]){
+			flag = 0;
+			break;
+		}
+	}
+
+	return flag;
 }
 
 void bubble_sort(int* numbers, int length){
@@ -180,7 +197,7 @@ int* merge_sort(int* numbers, int length){
 	return numbers;
 }
 
-int* quick_sort(int* numbers, int length){
+void quick_sort(int* numbers, int length){
 	if(length >= 2){
 		int pivot = numbers[length-1];
 		int i = -1;
@@ -196,5 +213,40 @@ int* quick_sort(int* numbers, int length){
 		quick_sort(numbers, i+1);
 		quick_sort(&numbers[i+2], length-i-2);
 		
+	}
+}
+
+void max_heapify(int* numbers, int i, int length){
+	int left = (2*i)+1;
+	int right = (2*i)+2;
+	int largest = 0;
+
+	if(left < length && numbers[left] > numbers[i]){
+		largest = left;
+	}
+	else{
+		largest = i;
+	}
+
+	if(right < length && numbers[right] > numbers[largest]){
+		largest = right;
+	}
+
+	if(largest != i){
+		swap(&numbers[i], &numbers[largest]);
+		max_heapify(numbers, largest, length);
+	}
+}
+
+void heap_sort(int* numbers, int length){
+	// Build the heap
+	for(int i = (length/2)-1; i >= 0; i--){
+		max_heapify(numbers, i, length);
+	}
+
+	for(int i = length-1; i >= 1; i--){
+		swap(&numbers[0], &numbers[i]);
+		length--;
+		max_heapify(numbers, 0, length);
 	}
 }
