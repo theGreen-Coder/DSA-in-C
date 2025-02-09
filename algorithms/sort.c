@@ -10,7 +10,7 @@ void insertion_sort(int* numbers, int length);
 void selection_sort(int* numbers, int length);
 void shell_sort(int* numbers, int length);
 int* merge_sort(int* numbers, int length);
-void quick_sort(int* numbers, int length);
+int* quick_sort(int* numbers, int length);
 void heap_sort(int* numbers, int length);
 
 void print_numbers(int* numbers, int length);
@@ -22,7 +22,7 @@ int main(void){
 	int* numbers = generate_random_numbers(n);
 	print_numbers(numbers, n);
 
-	shell_sort(numbers, n);
+	quick_sort(numbers, n);
 
 	print_numbers(numbers, n);
 
@@ -59,6 +59,12 @@ void print_numbers(int* numbers, int length){
 	}
 	
 	printf("]\n");
+}
+
+void swap(int* a, int* b){
+	int tmp = *a;
+	*a = *b;
+	*b = tmp;
 }
 
 void bubble_sort(int* numbers, int length){
@@ -172,4 +178,23 @@ int* merge_sort(int* numbers, int length){
 	tmp = NULL;
 
 	return numbers;
+}
+
+int* quick_sort(int* numbers, int length){
+	if(length >= 2){
+		int pivot = numbers[length-1];
+		int i = -1;
+	
+		for(int j = 0; j < length-1; j++){
+			if(numbers[j] < pivot){
+				i++;
+				swap(&numbers[i], &numbers[j]);
+			}
+		}
+		swap(&numbers[i+1], &numbers[length-1]);
+
+		quick_sort(numbers, i+1);
+		quick_sort(&numbers[i+2], length-i-2);
+		
+	}
 }
