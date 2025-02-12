@@ -7,12 +7,14 @@
 // Generate numbers functions
 int* generate_random_numbers(int length);
 void print_numbers(int* numbers, int length);
-void print_results(int* numbers, int* copy_numbers, double time_taken, char algo_name[]);
+void print_results(int* numbers, int* copy_numbers, double time_taken, const char *algo_name);
 
 // Helper Functions
 void benchmark_sort(void (*sort_func)(int*, int), int *numbers, int *copy_numbers, int n, const char *sort_name);
+void digit_counting_sort(int* numbers, int digit, int length);
 int is_sorted(int* numbers, int* copy_numbers, int length);
-int find_max(int* numbers, int length);
+int get_digit(int num, int digit);
+int count_digits(int num);
 
 // Sorting Algorithms
 void bubble_sort(int* numbers, int length);
@@ -24,10 +26,12 @@ int* recursive_merge_sort(int* numbers, int length);
 void quick_sort(int* numbers, int length);
 void heap_sort(int* numbers, int length);
 void counting_sort(int* numbers, int length);
+void radix_sort(int* numbers, int length);
 
 // General Constants (PLAY WITH THESE NUMBERS)
-int const N = 100;
-int MAX_NUM = 100;
+int const N = 9999;
+int MAX_NUM = 1000000;
+int PRINT_ARRAYS = 0;
 
 
 int main(void){
@@ -35,10 +39,12 @@ int main(void){
 	int* copy_numbers = malloc(sizeof(int)*N);
 	clock_t start, end;
 
-	printf("Numbers to sort: \n");
-	print_numbers(numbers, N);
-	printf("\n");
-
+	if(PRINT_ARRAYS){
+		printf("Array to sort: \n");
+		print_numbers(numbers, N);
+		printf("\n");
+	}
+	
 	memcpy(copy_numbers, numbers, sizeof(int)*N);
 
 	struct {
@@ -53,6 +59,7 @@ int main(void){
 		{quick_sort, "Quick Sort"},
 		{heap_sort, "Heap Sort"},
 		{counting_sort, "Counting Sort"},
+		{radix_sort, "Raidx Sort"},
 	};
 
 	for (size_t i = 0; i < sizeof(sort_algorithms) / sizeof(sort_algorithms[0]); i++) {
@@ -97,10 +104,10 @@ void print_numbers(int* numbers, int length){
 	printf("]\n");
 }
 
-void print_results(int* numbers, int* copy_numbers, double time_taken, char algo_name[]){
+void print_results(int* numbers, int* copy_numbers, double time_taken, const char *algo_name){
 	int sorted_flag = is_sorted(numbers, copy_numbers, N);
 	
-	printf(algo_name);
+	printf("%s", algo_name);
 	if(sorted_flag){
 		printf(" Successful ✅! ");
 		printf("Time taken: %lf\n", time_taken);
@@ -117,6 +124,10 @@ void swap(int* a, int* b){
 	*b = tmp;
 }
 
+int compare_ints(const void *a, const void *b) {
+    return (*(int *)a - *(int *)b);
+}
+
 int is_sorted(int* numbers, int* copy_numbers, int length) {
 	int* sorted_numbers = malloc(length * sizeof(int));
 	if (!sorted_numbers) return 0;
@@ -125,7 +136,7 @@ int is_sorted(int* numbers, int* copy_numbers, int length) {
 		sorted_numbers[i] = copy_numbers[i];
 	}
 
-	qsort(sorted_numbers, length, sizeof(int), (int (*)(const void*, const void*)) strcmp);
+	qsort(sorted_numbers, length, sizeof(int), compare_ints);
 
 	int result = 1;
 	for (int i = 0; i < length; i++) {
@@ -145,7 +156,10 @@ void benchmark_sort(void (*sort_func)(int*, int), int *numbers, int *copy_number
 	sort_func(numbers, n);
 	end = clock();
 	print_results(numbers, copy_numbers, ((double)(end - start)) / CLOCKS_PER_SEC, sort_name);
-	print_numbers(numbers, N);
+	if(PRINT_ARRAYS){
+		print_numbers(numbers, N);
+	}
+	
 	printf("\n");
 	memcpy(numbers, copy_numbers, sizeof(int) * n);
 }
@@ -322,7 +336,8 @@ void heap_sort(int* numbers, int length){
 }
 
 void counting_sort(int* numbers, int length){
-	int max_num = MAX_NUM; //find_max(numbers, length);
+	// I'm cheating here a little bit, cause I know what the MAX_NUM will be
+	int max_num = MAX_NUM;
 
 	int* b = malloc(sizeof(int) * length);
 	int* c = malloc(sizeof(int) * (max_num));
@@ -346,4 +361,58 @@ void counting_sort(int* numbers, int length){
 	b = NULL;
 	free(c);
 	c = NULL;
+}
+
+int get_digit(int num, int digit){
+	int i = digit + 1;
+	int result = 0;
+
+	for(int j = 0; j<i; j++){
+		result = num % 10;
+		num /= 10;
+	}
+
+	return result;
+}
+
+void digit_counting_sort(int* numbers, int digit, int length){
+	int max_num = 10;
+
+	int* b = malloc(sizeof(int) * length);
+	int* c = malloc(sizeof(int) * (max_num));
+
+	for(int i=0; i<length; i++){
+		c[get_digit(numbers[i], digit)]++;
+	}
+
+	for(int i=1; i<max_num; i++){
+		c[i] += c[i-1]; 
+	}
+
+	for(int i=length-1; i >= 0; i--){
+		b[c[get_digit(numbers[i], digit)]-1] = numbers[i];
+		c[get_digit(numbers[i], digit)]--;
+	}
+
+	memcpy(numbers, b, length*sizeof(numbers[0]));
+
+	free(b);
+	b = NULL;
+	free(c);
+	c = NULL;
+}
+
+int count_digits(int num){
+	if(num==0){
+		return 1;
+	}
+	return (int)log10(num) + 1;
+}
+
+void radix_sort(int* numbers, int length){
+	int max_digits = count_digits(MAX_NUM-1);
+
+	for(int i = 0; i < max_digits; i++){
+		digit_counting_sort(numbers, i, length);
+	}
 }
